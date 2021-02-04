@@ -17,6 +17,7 @@
 
 package org.apache.openwhisk.core.database.test
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.scaladsl.Source
 import akka.stream.{ActorMaterializer, Materializer}
@@ -49,7 +50,6 @@ class AttachmentSupportTests extends FlatSpec with Matchers with ScalaFutures wi
   }
 
   class AttachmentSupportTestMock(val inliningConfig: InliningConfig) extends AttachmentSupport[WhiskEntity] {
-    override protected[core] implicit val materializer: Materializer = ActorMaterializer()
     override protected def attachmentScheme: String = "test"
     override protected def executionContext = actorSystem.dispatcher
     override protected[database] def put(d: WhiskEntity)(implicit transid: TransactionId) = ???

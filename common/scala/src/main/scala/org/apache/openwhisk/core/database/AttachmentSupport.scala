@@ -20,8 +20,8 @@ package org.apache.openwhisk.core.database
 import java.util.Base64
 
 import akka.NotUsed
+import akka.actor.ActorSystem
 import akka.http.scaladsl.model.{ContentType, Uri}
-import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import spray.json.DefaultJsonProtocol
@@ -48,9 +48,6 @@ case class InliningConfig(maxInlineSize: ByteSize)
  */
 trait AttachmentSupport[DocumentAbstraction <: DocumentSerializer] extends DefaultJsonProtocol {
 
-  /** Materializer required for stream processing */
-  protected[core] implicit val materializer: Materializer
-
   protected def executionContext: ExecutionContext
 
   /**
@@ -76,8 +73,9 @@ trait AttachmentSupport[DocumentAbstraction <: DocumentSerializer] extends Defau
    * if the source is large
    */
   protected[database] def inlineOrAttach(
-    docStream: Source[ByteString, _],
-    previousPrefix: ByteString = ByteString.empty): Future[Either[ByteString, Source[ByteString, _]]] = {
+    docStream:      Source[ByteString, _],
+    previousPrefix: ByteString            = ByteString.empty
+  )(implicit system: ActorSystem): Future[Either[ByteString, Source[ByteString, _]]] = {
     implicit val ec = executionContext
     docStream.prefixAndTail(1).runWith(Sink.head).flatMap {
       case (Nil, _) =>
@@ -141,12 +139,13 @@ trait AttachmentSupport[DocumentAbstraction <: DocumentSerializer] extends Defau
    * @return a tuple of updated document info and attachment metadata
    */
   protected[database] def attachToExternalStore[A <: DocumentAbstraction](
-    doc: A,
-    update: (A, Attached) => A,
-    contentType: ContentType,
-    docStream: Source[ByteString, _],
-    oldAttachment: Option[Attached],
-    attachmentStore: AttachmentStore)(implicit transid: TransactionId): Future[(DocInfo, Attached)] = {
+    doc:             A,
+    update:          (A, Attached) => A,
+    contentType:     ContentType,
+    docStream:       Source[ByteString, _],
+    oldAttachment:   Option[Attached],
+    attachmentStore: AttachmentStore
+  )(implicit transid: TransactionId, actorSystem: ActorSystem): Future[(DocInfo, Attached)] = {
 
     val asJson = doc.toDocumentRecord
     val id = asJson.fields("_id").convertTo[String].trim

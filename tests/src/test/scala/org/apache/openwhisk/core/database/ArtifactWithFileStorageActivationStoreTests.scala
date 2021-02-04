@@ -136,7 +136,7 @@ class ArtifactWithFileStorageActivationStoreTests()
 
   it should "store activations in artifact store and to file without result" in {
     val config = ArtifactWithFileStorageActivationStoreConfig("userlogs", "logs", "namespaceId", false)
-    val activationStore = new ArtifactWithFileStorageActivationStore(system, materializer, logging, config)
+    val activationStore = new ArtifactWithFileStorageActivationStore(system, logging, config)
     val logDir = new File(new File(".").getCanonicalPath, config.logPath)
 
     try {
@@ -187,7 +187,7 @@ class ArtifactWithFileStorageActivationStoreTests()
 
   it should "store activations in artifact store and to file with result" in {
     val config = ArtifactWithFileStorageActivationStoreConfig("userlogs", "logs", "namespaceId", true)
-    val activationStore = new ArtifactWithFileStorageActivationStore(system, materializer, logging, config)
+    val activationStore = new ArtifactWithFileStorageActivationStore(system, logging, config)
     val logDir = new File(new File(".").getCanonicalPath, config.logPath)
 
     try {
@@ -252,22 +252,23 @@ class ArtifactWithFileStorageActivationStoreTests()
                                                                           userIdField: String,
                                                                           writeResultToFile: Boolean)
 
-      class ArtifactWithFileStorageActivationStoreExtendedTest(
-        actorSystem: ActorSystem,
-        actorMaterializer: ActorMaterializer,
-        logging: Logging,
-        config: ArtifactWithFileStorageActivationStoreConfigExtendedTest =
-          loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfigExtendedTest](
-            ConfigKeys.activationStoreWithFileStorage))
-          extends ArtifactActivationStore(actorSystem, actorMaterializer, logging) {
+        class ArtifactWithFileStorageActivationStoreExtendedTest(
+          actorSystem: ActorSystem,
+          logging:     Logging,
+          config: ArtifactWithFileStorageActivationStoreConfigExtendedTest = loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfigExtendedTest](
+            ConfigKeys.activationStoreWithFileStorage
+          )
+        )
+          extends ArtifactActivationStore(actorSystem, logging) {
 
-        private val activationFileStorage =
-          new ActivationFileStorage(
-            config.logFilePrefix,
-            Paths.get(config.logPath),
-            config.writeResultToFile,
-            actorMaterializer,
-            logging)
+          private val activationFileStorage =
+            new ActivationFileStorage(
+              config.logFilePrefix,
+              Paths.get(config.logPath),
+              config.writeResultToFile,
+              actorSystem,
+              logging
+            )
 
         def getLogFile = activationFileStorage.getLogFile
 
@@ -298,9 +299,9 @@ class ArtifactWithFileStorageActivationStoreTests()
       val config =
         ArtifactWithFileStorageActivationStoreConfigExtendedTest("userlogs", "logs", "namespaceId", !includeResult)
 
-      val activationStore =
-        new ArtifactWithFileStorageActivationStoreExtendedTest(system, materializer, logging, config)
-      val logDir = new File(new File(".").getCanonicalPath, config.logPath)
+        val activationStore =
+          new ArtifactWithFileStorageActivationStoreExtendedTest(system, logging, config)
+        val logDir = new File(new File(".").getCanonicalPath, config.logPath)
 
       try {
         logDir.mkdir
