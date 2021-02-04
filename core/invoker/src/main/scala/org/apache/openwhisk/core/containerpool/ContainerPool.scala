@@ -76,7 +76,7 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
   var resent: Option[Run] = None
   val logMessageInterval = 10.seconds
   //periodically emit metrics (don't need to do this for each message!)
-  context.system.scheduler.schedule(30.seconds, 10.seconds, self, EmitMetrics)
+  context.system.scheduler.scheduleAtFixedRate(30.seconds, 10.seconds, self, EmitMetrics)
 
   // Key is ColdStartKey, value is the number of cold Start in minute
   var coldStartCount = immutable.Map.empty[ColdStartKey, Int]
@@ -91,7 +91,7 @@ class ContainerPool(childFactory: ActorRefFactory => ActorRef,
         .nextInt(v.toSeconds.toInt))
     .getOrElse(0)
     .seconds
-  context.system.scheduler.schedule(2.seconds, interval, self, AdjustPrewarmedContainer)
+  context.system.scheduler.scheduleAtFixedRate(2.seconds, interval, self, AdjustPrewarmedContainer)
 
   def logContainerStart(r: Run, containerState: String, activeActivations: Int, container: Option[Container]): Unit = {
     val namespaceName = r.msg.user.namespace.name.asString

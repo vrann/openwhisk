@@ -26,7 +26,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes.NotFound
 import akka.http.scaladsl.model.{ContentType, HttpRequest, HttpResponse, Uri}
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, ByteStringBuilder}
 import com.azure.storage.blob.sas.{BlobContainerSasPermission, BlobServiceSasSignatureValues}
@@ -75,14 +74,12 @@ case class AzBlobRetryConfig(retryPolicyType: RetryPolicyType,
                              secondaryHost: Option[String])
 object AzureBlobAttachmentStoreProvider extends AttachmentStoreProvider {
   override def makeStore[D <: DocumentSerializer: ClassTag]()(implicit actorSystem: ActorSystem,
-                                                              logging: Logging,
-                                                              materializer: ActorMaterializer): AttachmentStore = {
+                                                              logging: Logging): AttachmentStore = {
     makeStore[D](actorSystem.settings.config)
   }
 
   def makeStore[D <: DocumentSerializer: ClassTag](config: Config)(implicit actorSystem: ActorSystem,
-                                                                   logging: Logging,
-                                                                   materializer: ActorMaterializer): AttachmentStore = {
+                                                                   logging: Logging): AttachmentStore = {
     val azConfig = loadConfigOrThrow[AzBlobConfig](config, ConfigKeys.azBlob)
     new AzureBlobAttachmentStore(createClient(azConfig), azConfig.prefixFor[D], azConfig)
   }
@@ -114,10 +111,11 @@ object AzureBlobAttachmentStoreProvider extends AttachmentStoreProvider {
 }
 
 class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String, config: AzBlobConfig)(
-  implicit system: ActorSystem,
-  logging: Logging,
-  materializer: ActorMaterializer)
-    extends AttachmentStore {
+  implicit
+  system:  ActorSystem,
+  logging: Logging
+)
+  extends AttachmentStore {
   override protected[core] def scheme: String = "az"
 
   override protected[core] implicit val executionContext: ExecutionContext = system.dispatcher
@@ -251,7 +249,9 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
   }
 
   override protected[core] def deleteAttachment(docId: DocId, name: String)(
-    implicit transid: TransactionId): Future[Boolean] = {
+    implicit
+    transid: TransactionId
+  ): Future[Boolean] = {
     val start =
       transid.started(this, DATABASE_ATT_DELETE, s"[ATT_DELETE] deleting attachment '$name' of document 'id: $docId'")
 
@@ -263,7 +263,8 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
     reportFailure(
       f,
       start,
-      failure => s"[ATT_DELETE] '$prefix' internal error, doc: '$docId', failure: '${failure.getMessage}'")
+      failure => s"[ATT_DELETE] '$prefix' internal error, doc: '$docId', failure: '${failure.getMessage}'"
+    )
   }
 
   override def shutdown(): Unit = {}
@@ -277,7 +278,9 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
     client.getBlobAsyncClient(objectKey(docId, name)).getBlockBlobAsyncClient
 
   private def getAttachmentSource(objectKey: String, config: AzBlobConfig)(
-    implicit tid: TransactionId): Future[Option[Source[ByteString, Any]]] = {
+    implicit
+    tid: TransactionId
+  ): Future[Option[Source[ByteString, Any]]] = {
     val blobClient = client.getBlobAsyncClient(objectKey).getBlockBlobAsyncClient
 
     config.azureCdnConfig match {
@@ -294,7 +297,8 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
         val url = parts.setHost(cdnConfig.domainName)
         logging.info(
           this,
-          s"[ATT_GET] '$prefix' downloading attachment from azure cdn '$objectKey' with url (sas params not displayed) ${url}")
+          s"[ATT_GET] '$prefix' downloading attachment from azure cdn '$objectKey' with url (sas params not displayed) ${url}"
+        )
         //append the sas params to the url before downloading
         val cdnUrlWithSas = s"${url.toUrl.toString}?$sas"
         getUrlContent(cdnUrlWithSas)
