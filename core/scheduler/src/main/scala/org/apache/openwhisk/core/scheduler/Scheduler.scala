@@ -19,7 +19,6 @@ package org.apache.openwhisk.core.scheduler
 
 import akka.Done
 import akka.actor.{ActorRefFactory, ActorSelection, ActorSystem, CoordinatedShutdown}
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigValueFactory
 import kamon.Kamon
@@ -46,7 +45,6 @@ import pureconfig.generic.auto._
 class Scheduler(schedulerId: SchedulerInstanceId, schedulerEndpoints: SchedulerEndpoints)(
   implicit config: WhiskConfig,
   actorSystem: ActorSystem,
-  materializer: ActorMaterializer,
   logging: Logging)
     extends SchedulerCore {
   implicit val ec = actorSystem.dispatcher
@@ -62,7 +60,7 @@ class Scheduler(schedulerId: SchedulerInstanceId, schedulerEndpoints: SchedulerE
 
   implicit val entityStore = WhiskEntityStore.datastore()
   private val activationStore =
-    SpiLoader.get[ActivationStoreProvider].instance(actorSystem, materializer, logging)
+    SpiLoader.get[ActivationStoreProvider].instance(actorSystem, logging)
 
   private val ack = {
     val sender = if (UserEvents.enabled) Some(new UserEventSender(producer)) else None
@@ -196,7 +194,6 @@ object Scheduler {
     implicit val ec = ExecutionContextFactory.makeCachedThreadPoolExecutionContext()
     implicit val actorSystem: ActorSystem =
       ActorSystem(name = "scheduler-actor-system", defaultExecutionContext = Some(ec))
-    implicit val materializer = ActorMaterializer.create(actorSystem)
 
     implicit val logger = new AkkaLogging(akka.event.Logging.getLogger(actorSystem, this))
 
@@ -253,8 +250,7 @@ object Scheduler {
           if (Scheduler.protocol == "https") Some(loadConfigOrThrow[HttpsConfig]("whisk.controller.https")) else None
 
         BasicHttpService.startHttpService(FPCSchedulerServer.instance(scheduler).route, port, httpsConfig)(
-          actorSystem,
-          ActorMaterializer.create(actorSystem))
+          actorSystem)
 
       case Failure(t) =>
         abort(s"Invalid runtimes manifest: $t")

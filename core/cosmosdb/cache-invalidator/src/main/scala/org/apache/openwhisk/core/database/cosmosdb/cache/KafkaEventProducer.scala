@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 case class KafkaEventProducer(
   settings: ProducerSettings[String, String],
   topic: String,
-  eventProducerConfig: EventProducerConfig)(implicit system: ActorSystem, materializer: ActorMaterializer, log: Logging)
+  eventProducerConfig: EventProducerConfig)(implicit system: ActorSystem, log: Logging)
     extends EventProducer {
   private implicit val executionContext: ExecutionContext = system.dispatcher
 

@@ -31,23 +31,14 @@ import akka.http.scaladsl.model.StatusCodes.{Accepted, NotFound, OK}
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.Uri.{Path, Query}
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OAuth2BearerToken}
-import akka.stream.ActorMaterializer
 import akka.util.ByteString
-import com.typesafe.sslconfig.akka.AkkaSSLConfig
 import common.TestUtils.{ANY_ERROR_EXIT, DONTCARE_EXIT, RunResult, SUCCESS_EXIT}
-import common.{
-  DeleteFromCollectionOperations,
-  HasActivation,
-  ListOrGetFromCollectionOperations,
-  WaitFor,
-  WhiskProperties,
-  WskProps,
-  _
-}
+import common.rest.SSL.httpsConfig
+import common.{DeleteFromCollectionOperations, HasActivation, ListOrGetFromCollectionOperations, WaitFor, WhiskProperties, WskProps, _}
 import javax.net.ssl._
 import org.apache.commons.io.{FileUtils, FilenameUtils}
 import org.apache.openwhisk.common.Https.HttpsConfig
-import org.apache.openwhisk.common.{AkkaLogging, TransactionId}
+import org.apache.openwhisk.common.{AkkaLogging, Https, TransactionId}
 import org.apache.openwhisk.core.entity.ByteSize
 import org.apache.openwhisk.utils.retry
 import org.scalatest.Matchers
@@ -103,10 +94,7 @@ object SSL {
   }
 
   def httpsConnectionContext(implicit system: ActorSystem): HttpsConnectionContext = {
-    val sslConfig = AkkaSSLConfig().mapSettings { s =>
-      s.withHostnameVerifierClass(classOf[AcceptAllHostNameVerifier].asInstanceOf[Class[HostnameVerifier]])
-    }
-    new HttpsConnectionContext(SSL.nonValidatingContext(httpsConfig.clientAuth.toBoolean), Some(sslConfig))
+    Https.connectionContextClient(httpsConfig, true)
   }
 }
 
@@ -1145,13 +1133,8 @@ trait RunRestCmd extends Matchers with ScalaFutures with SwaggerValidator {
   implicit val config: PatienceConfig = PatienceConfig(100 seconds, 15 milliseconds)
   implicit val actorSystem: ActorSystem
   lazy implicit val executionContext: ExecutionContext = actorSystem.dispatcher
-  lazy implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  lazy val sslConfig: AkkaSSLConfig = AkkaSSLConfig().mapSettings {
-    _.withHostnameVerifierClass(classOf[AcceptAllHostNameVerifier].asInstanceOf[Class[HostnameVerifier]])
-  }
-
-  lazy val connectionContext = new HttpsConnectionContext(SSL.nonValidatingContext(), Some(sslConfig))
+  lazy val connectionContext = Https.connectionContextClient(httpsConfig, true)
 
   def isStatusCodeExpected(expectedExitCode: Int, statusCode: Int): Boolean = {
     if ((expectedExitCode != DONTCARE_EXIT) && (expectedExitCode != ANY_ERROR_EXIT))

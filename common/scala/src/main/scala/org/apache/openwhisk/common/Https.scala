@@ -83,7 +83,7 @@ object Https {
   }
 
   def connectionContextServer(httpsConfig: HttpsConfig, withDisableHostnameVerification: Boolean = false): HttpsConnectionContext = {
-    val sslContext = applyHttpsConfig(httpsConfig, withDisableHostnameVerification)
+    val sslContext: SSLContext = applyHttpsConfig(httpsConfig, withDisableHostnameVerification)
     ConnectionContext.httpsServer(sslContext)
   }
 }

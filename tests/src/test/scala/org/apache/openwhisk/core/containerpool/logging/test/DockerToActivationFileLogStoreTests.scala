@@ -39,17 +39,19 @@ import org.apache.openwhisk.http.Messages
  */
 @RunWith(classOf[JUnitRunner])
 class DockerToActivationFileLogStoreTests
-    extends DockerToActivationLogStoreTests
-    with Matchers
-    with WskActorSystem
-    with StreamLogging {
+  extends DockerToActivationLogStoreTests
+  with Matchers
+  with WskActorSystem
+  with StreamLogging {
 
   override def createStore() = new TestLogStoreTo(Sink.ignore)
 
-  def toLoggedEvent(line: LogLine,
-                    namespace: Namespace,
-                    activationId: ActivationId,
-                    actionName: FullyQualifiedEntityName): String = {
+  def toLoggedEvent(
+    line:         LogLine,
+    namespace:    Namespace,
+    activationId: ActivationId,
+    actionName:   FullyQualifiedEntityName
+  ): String = {
     val event = line.toJson.compactPrint
     val concatenated =
       s""","activationId":"${activationId.asString}","action":"${actionName.asString}","namespace":"${namespace.name.asString}","namespaceId":"${namespace.uuid.asString}""""
@@ -71,14 +73,15 @@ class DockerToActivationFileLogStoreTests
     val testActor = TestProbe()
 
     val container = new TestContainer(testSource)
-    val store = new TestLogStoreTo(Flow[ByteString].map(_.utf8String).to(Sink.actorRef(testActor.ref, ())))
+    val store = new TestLogStoreTo(Flow[ByteString].map(_.utf8String).to(Sink.actorRef(testActor.ref, (), (_: Throwable) => _)))
 
     val collected = store.collectLogs(TransactionId.testing, user, successfulActivation, container, action)
 
     await(collected) shouldBe ActivationLogs(logs.map(_.toFormattedString).toVector)
     logs.foreach { line =>
       testActor.expectMsg(
-        toLoggedEvent(line, user.namespace, successfulActivation.activationId, action.fullyQualifiedName(false)))
+        toLoggedEvent(line, user.namespace, successfulActivation.activationId, action.fullyQualifiedName(false))
+      )
     }
 
     // Last message should be the full activation
@@ -88,15 +91,17 @@ class DockerToActivationFileLogStoreTests
   it should "read logs with log collecting error with developer error" in {
     val logs = List(
       LogLine(Instant.now.toString, "stdout", "this is a log"),
-      LogLine(Instant.now.toString, "stderr", Messages.logFailure))
+      LogLine(Instant.now.toString, "stderr", Messages.logFailure)
+    )
 
     val testActor = TestProbe()
 
     val container = new TestContainer(Source(toByteString(logs)))
-    val store = new TestLogStoreTo(Flow[ByteString].map(_.utf8String).to(Sink.actorRef(testActor.ref, ())))
+    val store = new TestLogStoreTo(Flow[ByteString].map(_.utf8String).to(Sink.actorRef(testActor.ref, (), (_: Throwable) => _)))
 
     val ex = the[LogCollectingException] thrownBy await(
-      store.collectLogs(TransactionId.testing, user, developerErrorActivation, container, action))
+      store.collectLogs(TransactionId.testing, user, developerErrorActivation, container, action)
+    )
     val collectedLogs = ex.partialLogs.logs
 
     withClue("Collected logs should match provided logs:") {
@@ -111,7 +116,8 @@ class DockerToActivationFileLogStoreTests
     withClue("Provided logs should be received by log store:") {
       logs.foreach { line =>
         testActor.expectMsg(
-          toLoggedEvent(line, user.namespace, developerErrorActivation.activationId, action.fullyQualifiedName(false)))
+          toLoggedEvent(line, user.namespace, developerErrorActivation.activationId, action.fullyQualifiedName(false))
+        )
       }
     }
 
@@ -131,5 +137,5 @@ class DockerToActivationFileLogStoreTests
   }
 
   class TestLogStoreTo(override val writeToFile: Sink[ByteString, _])
-      extends DockerToActivationFileLogStore(actorSystem)
+    extends DockerToActivationFileLogStore(actorSystem)
 }

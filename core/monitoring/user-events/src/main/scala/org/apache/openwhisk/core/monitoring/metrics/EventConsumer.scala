@@ -24,7 +24,7 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.kafka.scaladsl.{Committer, Consumer}
 import akka.kafka.{CommitterSettings, ConsumerSettings, Subscriptions}
-import akka.stream.ActorMaterializer
+import akka.stream.RestartSettings
 import akka.stream.scaladsl.{RestartSource, Sink}
 import javax.management.ObjectName
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -46,10 +46,12 @@ trait MetricRecorder {
   def processMetric(metric: Metric, initiatorNamespace: String): Unit
 }
 
-case class EventConsumer(settings: ConsumerSettings[String, String],
-                         recorders: Seq[MetricRecorder],
-                         metricConfig: MetricConfig)(implicit system: ActorSystem, materializer: ActorMaterializer)
-    extends KafkaMetricsProvider {
+case class EventConsumer(
+  settings:     ConsumerSettings[String, String],
+  recorders:    Seq[MetricRecorder],
+  metricConfig: MetricConfig
+)(implicit system: ActorSystem)
+  extends KafkaMetricsProvider {
   import EventConsumer._
 
   private implicit val ec: ExecutionContext = system.dispatcher
@@ -90,11 +92,11 @@ case class EventConsumer(settings: ConsumerSettings[String, String],
   private val control = new AtomicReference[Consumer.Control](Consumer.NoopControl)
 
   private val result = RestartSource
-    .onFailuresWithBackoff(
+    .onFailuresWithBackoff(RestartSettings(
       minBackoff = metricConfig.retry.minBackoff,
       maxBackoff = metricConfig.retry.maxBackoff,
-      randomFactor = metricConfig.retry.randomFactor,
-      maxRestarts = metricConfig.retry.maxRestarts) { () =>
+      randomFactor = metricConfig.retry.randomFactor
+    ).withMaxRestarts(metricConfig.retry.maxRestarts, metricConfig.retry.minBackoff)) { () =>
       Consumer
         .committableSource(updatedSettings, Subscriptions.topics(userEventTopic))
         // this is to access to the Consumer.Control
@@ -109,7 +111,7 @@ case class EventConsumer(settings: ConsumerSettings[String, String],
     .runWith(Sink.ignore)
 
   private val lagRecorder =
-    system.scheduler.schedule(10.seconds, 10.seconds)(lagGauge.update(consumerLag))
+    system.scheduler.scheduleAtFixedRate(10.seconds, 10.seconds)(() => lagGauge.update(consumerLag))
 
   private def processEvent(value: String): Unit = {
     EventMessage

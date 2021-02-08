@@ -17,10 +17,8 @@
 
 package org.apache.openwhisk.core.database.test
 
-import akka.actor.ActorSystem
 import akka.http.scaladsl.model.Uri
 import akka.stream.scaladsl.Source
-import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.CompactByteString
 import common.WskActorSystem
 import org.junit.runner.RunWith
@@ -37,7 +35,6 @@ class AttachmentSupportTests extends FlatSpec with Matchers with ScalaFutures wi
 
   behavior of "Attachment inlining"
 
-  implicit val materializer: Materializer = ActorMaterializer()
 
   it should "not inline if maxInlineSize set to zero" in {
     val inliner = new AttachmentSupportTestMock(InliningConfig(maxInlineSize = 0.KB))

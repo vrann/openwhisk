@@ -23,7 +23,6 @@ import java.time.Instant
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.model.HttpRequest
-import akka.stream.ActorMaterializer
 import akka.testkit.TestKit
 import common.StreamLogging
 import org.junit.runner.RunWith
@@ -56,7 +55,6 @@ class ArtifactWithFileStorageActivationStoreTests()
   implicit val transid: TransactionId = TransactionId.testing
   implicit val notifier: Option[CacheChangeNotification] = None
 
-  private val materializer = ActorMaterializer()
   private val uuid = UUID()
   private val subject = Subject()
   private val user =
