@@ -173,9 +173,9 @@ object BasicHttpService {
     actorSystem: ActorSystem
   ): Unit = {
     val httpsContext = config.map(Https.connectionContextServer(_))
-    val httpBindingBuilder: ServerBuilder = Http().newServerAt(interface, port)
+    var httpBindingBuilder: ServerBuilder = Http().newServerAt(interface, port)
     if (httpsContext.isDefined) {
-      httpBindingBuilder.enableHttps(httpsContext.get)
+      httpBindingBuilder = httpBindingBuilder.enableHttps(httpsContext.get)
     }
     val httpBinding = httpBindingBuilder.bindFlow(route)
     addShutdownHook(httpBinding)
