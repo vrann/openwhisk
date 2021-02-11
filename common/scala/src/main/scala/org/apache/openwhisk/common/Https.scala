@@ -74,7 +74,10 @@ object Https {
 
   def connectionContextClient(httpsConfig: HttpsConfig, withDisableHostnameVerification: Boolean = false): HttpsConnectionContext = {
     val sslContext = applyHttpsConfig(httpsConfig, withDisableHostnameVerification)
+    connectionContextClient(sslContext, withDisableHostnameVerification)
+  }
 
+  def connectionContextClient(sslContext: SSLContext, withDisableHostnameVerification: Boolean): HttpsConnectionContext = {
     if (withDisableHostnameVerification) {
       httpsInsecureClient(sslContext)
     } else {

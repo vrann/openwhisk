@@ -1134,7 +1134,8 @@ trait RunRestCmd extends Matchers with ScalaFutures with SwaggerValidator {
   implicit val actorSystem: ActorSystem
   lazy implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-  lazy val connectionContext = Https.connectionContextClient(httpsConfig, true)
+  lazy val connectionContext = Https.connectionContextClient(SSL.nonValidatingContext(httpsConfig.clientAuth.toBoolean),
+    true)
 
   def isStatusCodeExpected(expectedExitCode: Int, statusCode: Int): Boolean = {
     if ((expectedExitCode != DONTCARE_EXIT) && (expectedExitCode != ANY_ERROR_EXIT))
