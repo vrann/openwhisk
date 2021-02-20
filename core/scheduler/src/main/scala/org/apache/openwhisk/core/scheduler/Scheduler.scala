@@ -42,10 +42,9 @@ import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 import pureconfig.generic.auto._
 
-class Scheduler(schedulerId: SchedulerInstanceId, schedulerEndpoints: SchedulerEndpoints)(
-  implicit config: WhiskConfig,
-  actorSystem: ActorSystem,
-  logging: Logging)
+class Scheduler(schedulerId: SchedulerInstanceId, schedulerEndpoints: SchedulerEndpoints)(implicit config: WhiskConfig,
+                                                                                          actorSystem: ActorSystem,
+                                                                                          logging: Logging)
     extends SchedulerCore {
   implicit val ec = actorSystem.dispatcher
   private val authStore = WhiskAuthStore.datastore()
@@ -249,8 +248,7 @@ object Scheduler {
         val httpsConfig =
           if (Scheduler.protocol == "https") Some(loadConfigOrThrow[HttpsConfig]("whisk.controller.https")) else None
 
-        BasicHttpService.startHttpService(FPCSchedulerServer.instance(scheduler).route, port, httpsConfig)(
-          actorSystem)
+        BasicHttpService.startHttpService(FPCSchedulerServer.instance(scheduler).route, port, httpsConfig)(actorSystem)
 
       case Failure(t) =>
         abort(s"Invalid runtimes manifest: $t")
