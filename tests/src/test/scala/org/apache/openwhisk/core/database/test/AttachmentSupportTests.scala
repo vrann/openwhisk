@@ -35,7 +35,6 @@ class AttachmentSupportTests extends FlatSpec with Matchers with ScalaFutures wi
 
   behavior of "Attachment inlining"
 
-
   it should "not inline if maxInlineSize set to zero" in {
     val inliner = new AttachmentSupportTestMock(InliningConfig(maxInlineSize = 0.KB))
     val bs = CompactByteString("hello world")

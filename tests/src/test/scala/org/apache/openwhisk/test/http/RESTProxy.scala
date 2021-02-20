@@ -107,25 +107,25 @@ class RESTProxy(val host: String, val port: Int)(val serviceAuthority: Uri.Autho
       // If the actor isn't bound to the port / has no materializer,
       // the request is simply dropped.
 
-        log.debug(s"[RESTProxy] Proxying '${request.uri}' to '${serviceAuthority}'")
+      log.debug(s"[RESTProxy] Proxying '${request.uri}' to '${serviceAuthority}'")
 
-        val flow = if (useHTTPS) {
-          Http().outgoingConnectionHttps(destHost, destPort)
-        } else {
-          Http().outgoingConnection(destHost, destPort)
-        }
+      val flow = if (useHTTPS) {
+        Http().outgoingConnectionHttps(destHost, destPort)
+      } else {
+        Http().outgoingConnection(destHost, destPort)
+      }
 
-        // akka-http doesn't like us to set those headers ourselves.
-        val upstreamRequest = request.withHeaders(headers = request.headers.filter(_ match {
-          case `Timeout-Access`(_) => false
-          case _                   => true
-        }))
+      // akka-http doesn't like us to set those headers ourselves.
+      val upstreamRequest = request.withHeaders(headers = request.headers.filter(_ match {
+        case `Timeout-Access`(_) => false
+        case _                   => true
+      }))
 
-        Source
-          .single(upstreamRequest)
-          .via(flow)
-          .runWith(Sink.head)
-          .pipeTo(sender)
+      Source
+        .single(upstreamRequest)
+        .via(flow)
+        .runWith(Sink.head)
+        .pipeTo(sender)
 
   }
 }

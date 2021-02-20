@@ -34,7 +34,15 @@ import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, OA
 import akka.util.ByteString
 import common.TestUtils.{ANY_ERROR_EXIT, DONTCARE_EXIT, RunResult, SUCCESS_EXIT}
 import common.rest.SSL.httpsConfig
-import common.{DeleteFromCollectionOperations, HasActivation, ListOrGetFromCollectionOperations, WaitFor, WhiskProperties, WskProps, _}
+import common.{
+  DeleteFromCollectionOperations,
+  HasActivation,
+  ListOrGetFromCollectionOperations,
+  WaitFor,
+  WhiskProperties,
+  WskProps,
+  _
+}
 import javax.net.ssl._
 import org.apache.commons.io.{FileUtils, FilenameUtils}
 import org.apache.openwhisk.common.Https.HttpsConfig
@@ -103,6 +111,7 @@ object HttpConnection {
   /**
    * Returns either the https context that is tailored for self-signed certificates on the controller, or
    * a default connection context used in Http.SingleRequest
+   *
    * @param protocol protocol used to communicate with controller API
    * @param system actor system
    * @return https connection context
@@ -804,8 +813,8 @@ class RestNamespaceOperations(implicit val actorSystem: ActorSystem) extends Nam
    * @param expectedExitCode (optional) the expected exit code for the command
    * if the code is anything but DONTCARE_EXIT, assert the code is as expected
    */
-  override def list(expectedExitCode: Int = OK.intValue, nameSort: Option[Boolean] = None)(
-    implicit wp: WskProps): RestResult = {
+  override def list(expectedExitCode: Int = OK.intValue, nameSort: Option[Boolean] = None)(implicit
+                                                                                           wp: WskProps): RestResult = {
     val entPath = Path(s"$basePath/namespaces")
     val resp = requestEntity(GET, entPath)
     val result = new RestResult(resp.status, getTransactionId(resp), getRespData(resp))
@@ -1134,8 +1143,8 @@ trait RunRestCmd extends Matchers with ScalaFutures with SwaggerValidator {
   implicit val actorSystem: ActorSystem
   lazy implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
-  lazy val connectionContext = Https.connectionContextClient(SSL.nonValidatingContext(httpsConfig.clientAuth.toBoolean),
-    true)
+  lazy val connectionContext =
+    Https.connectionContextClient(SSL.nonValidatingContext(httpsConfig.clientAuth.toBoolean), true)
 
   def isStatusCodeExpected(expectedExitCode: Int, statusCode: Int): Boolean = {
     if ((expectedExitCode != DONTCARE_EXIT) && (expectedExitCode != ANY_ERROR_EXIT))

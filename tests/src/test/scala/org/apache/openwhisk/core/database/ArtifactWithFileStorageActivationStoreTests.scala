@@ -250,23 +250,21 @@ class ArtifactWithFileStorageActivationStoreTests()
                                                                           userIdField: String,
                                                                           writeResultToFile: Boolean)
 
-        class ArtifactWithFileStorageActivationStoreExtendedTest(
-          actorSystem: ActorSystem,
-          logging:     Logging,
-          config: ArtifactWithFileStorageActivationStoreConfigExtendedTest = loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfigExtendedTest](
-            ConfigKeys.activationStoreWithFileStorage
-          )
-        )
+      class ArtifactWithFileStorageActivationStoreExtendedTest(
+        actorSystem: ActorSystem,
+        logging: Logging,
+        config: ArtifactWithFileStorageActivationStoreConfigExtendedTest =
+          loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfigExtendedTest](
+            ConfigKeys.activationStoreWithFileStorage))
           extends ArtifactActivationStore(actorSystem, logging) {
 
-          private val activationFileStorage =
-            new ActivationFileStorage(
-              config.logFilePrefix,
-              Paths.get(config.logPath),
-              config.writeResultToFile,
-              actorSystem,
-              logging
-            )
+        private val activationFileStorage =
+          new ActivationFileStorage(
+            config.logFilePrefix,
+            Paths.get(config.logPath),
+            config.writeResultToFile,
+            actorSystem,
+            logging)
 
         def getLogFile = activationFileStorage.getLogFile
 
@@ -274,7 +272,8 @@ class ArtifactWithFileStorageActivationStoreTests()
         // other simple example for the flag: (includeResult && !activation.response.isSuccess)
 
         override def store(activation: WhiskActivation, context: UserContext)(
-          implicit transid: TransactionId,
+          implicit
+          transid: TransactionId,
           notifier: Option[CacheChangeNotification]): Future[DocInfo] = {
 
           val additionalFields = Map(config.userIdField -> context.user.namespace.uuid.toJson)
@@ -297,9 +296,9 @@ class ArtifactWithFileStorageActivationStoreTests()
       val config =
         ArtifactWithFileStorageActivationStoreConfigExtendedTest("userlogs", "logs", "namespaceId", !includeResult)
 
-        val activationStore =
-          new ArtifactWithFileStorageActivationStoreExtendedTest(system, logging, config)
-        val logDir = new File(new File(".").getCanonicalPath, config.logPath)
+      val activationStore =
+        new ArtifactWithFileStorageActivationStoreExtendedTest(system, logging, config)
+      val logDir = new File(new File(".").getCanonicalPath, config.logPath)
 
       try {
         logDir.mkdir
