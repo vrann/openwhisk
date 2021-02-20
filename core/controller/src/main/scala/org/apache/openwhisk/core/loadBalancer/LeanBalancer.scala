@@ -87,9 +87,8 @@ class LeanBalancer(config: WhiskConfig,
 
 object LeanBalancer extends LoadBalancerProvider {
 
-  override def instance(whiskConfig: WhiskConfig, instance: ControllerInstanceId)(
-    implicit actorSystem: ActorSystem,
-    logging: Logging): LoadBalancer = {
+  override def instance(whiskConfig: WhiskConfig, instance: ControllerInstanceId)(implicit actorSystem: ActorSystem,
+                                                                                  logging: Logging): LoadBalancer = {
 
     new LeanBalancer(whiskConfig, createFeedFactory(whiskConfig, instance), instance)
   }

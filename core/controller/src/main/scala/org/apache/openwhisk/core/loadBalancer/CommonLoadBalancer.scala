@@ -41,15 +41,13 @@ import scala.util.{Failure, Success}
 /**
  * Abstract class which provides common logic for all LoadBalancer implementations.
  */
-abstract class CommonLoadBalancer(
-  config:             WhiskConfig,
-  feedFactory:        FeedFactory,
-  controllerInstance: ControllerInstanceId
-)(implicit
-  val actorSystem: ActorSystem,
-  logging:           Logging,
-  messagingProvider: MessagingProvider)
-  extends LoadBalancer {
+abstract class CommonLoadBalancer(config: WhiskConfig,
+                                  feedFactory: FeedFactory,
+                                  controllerInstance: ControllerInstanceId)(implicit
+                                                                            val actorSystem: ActorSystem,
+                                                                            logging: Logging,
+                                                                            messagingProvider: MessagingProvider)
+    extends LoadBalancer {
 
   protected implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 

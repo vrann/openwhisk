@@ -88,6 +88,7 @@ class Controller(val instance: ControllerInstanceId,
    * A Route in Akka is technically a function taking a RequestContext as a parameter.
    *
    * The "~" Akka DSL operator composes two independent Routes, building a routing tree structure.
+   *
    * @see http://doc.akka.io/docs/akka-http/current/scala/http/routing-dsl/routes.html#composing-routes
    */
   override def routes(implicit transid: TransactionId): Route = {
@@ -273,18 +274,12 @@ object Controller {
 
     ExecManifest.initialize(config) match {
       case Success(_) =>
-        val controller = new Controller(
-          instance,
-          ExecManifest.runtimesManifest,
-          config,
-          actorSystem,
-          logger)
+        val controller = new Controller(instance, ExecManifest.runtimesManifest, config, actorSystem, logger)
 
         val httpsConfig =
           if (Controller.protocol == "https") Some(loadConfigOrThrow[HttpsConfig]("whisk.controller.https")) else None
 
-        BasicHttpService.startHttpService(controller.route, port, httpsConfig, interface)(
-          actorSystem)
+        BasicHttpService.startHttpService(controller.route, port, httpsConfig, interface)(actorSystem)
 
       case Failure(t) =>
         abort(s"Invalid runtimes manifest: $t")
