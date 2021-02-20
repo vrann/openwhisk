@@ -198,8 +198,7 @@ object Invoker {
       if (Invoker.protocol == "https") Some(loadConfigOrThrow[HttpsConfig]("whisk.invoker.https")) else None
 
     val invokerServer = SpiLoader.get[InvokerServerProvider].instance(invoker)
-    BasicHttpService.startHttpService(invokerServer.route, port, httpsConfig)(
-      actorSystem)
+    BasicHttpService.startHttpService(invokerServer.route, port, httpsConfig)(actorSystem)
   }
 }
 

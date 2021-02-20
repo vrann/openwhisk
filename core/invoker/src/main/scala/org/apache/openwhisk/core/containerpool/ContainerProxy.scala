@@ -1126,8 +1126,7 @@ class TCPPingClient(tcp: ActorRef,
   private def restartPing() = {
     cancelPing() //just in case restart is called twice
     scheduledPing = Some(
-      context.system.scheduler.scheduleAtFixedRate(config.checkPeriod, config.checkPeriod, self, HealthPingSend)
-    )
+      context.system.scheduler.scheduleAtFixedRate(config.checkPeriod, config.checkPeriod, self, HealthPingSend))
   }
   private def cancelPing() = {
     scheduledPing.foreach(_.cancel())
