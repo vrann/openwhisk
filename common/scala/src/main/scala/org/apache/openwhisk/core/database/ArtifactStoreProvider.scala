@@ -30,18 +30,14 @@ import scala.reflect.ClassTag
  * An Spi for providing ArtifactStore implementations
  */
 trait ArtifactStoreProvider extends Spi {
-  def makeStore[D <: DocumentSerializer: ClassTag](useBatching: Boolean = false)(
-    implicit jsonFormat: RootJsonFormat[D],
-    docReader: DocumentReader,
-    actorSystem: ActorSystem,
-    logging:     Logging
-  ): ArtifactStore[D]
+  def makeStore[D <: DocumentSerializer: ClassTag](useBatching: Boolean = false)(implicit jsonFormat: RootJsonFormat[D],
+                                                                                 docReader: DocumentReader,
+                                                                                 actorSystem: ActorSystem,
+                                                                                 logging: Logging): ArtifactStore[D]
 
-  protected def getAttachmentStore[D <: DocumentSerializer: ClassTag]()(
-    implicit
-    actorSystem: ActorSystem,
-    logging:     Logging
-  ): Option[AttachmentStore] = {
+  protected def getAttachmentStore[D <: DocumentSerializer: ClassTag]()(implicit
+                                                                        actorSystem: ActorSystem,
+                                                                        logging: Logging): Option[AttachmentStore] = {
     if (ConfigFactory.load().hasPath("whisk.spi.AttachmentStoreProvider")) {
       Some(SpiLoader.get[AttachmentStoreProvider].makeStore[D]())
     } else {

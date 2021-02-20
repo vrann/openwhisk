@@ -57,8 +57,7 @@ case class ElasticSearchActivationStoreConfig(protocol: String,
 class ElasticSearchActivationStore(
   httpFlow: Option[Flow[(HttpRequest, Promise[HttpResponse]), (Try[HttpResponse], Promise[HttpResponse]), Any]] = None,
   elasticSearchConfig: ElasticSearchActivationStoreConfig,
-  useBatching: Boolean = false)(implicit actorSystem: ActorSystem,
-                                logging: Logging)
+  useBatching: Boolean = false)(implicit actorSystem: ActorSystem, logging: Logging)
     extends ActivationStore {
 
   import com.sksamuel.elastic4s.http.ElasticDsl._

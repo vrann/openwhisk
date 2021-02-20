@@ -45,9 +45,7 @@ object MemoryAttachmentStoreProvider extends AttachmentStoreProvider {
 /**
  * Basic in-memory AttachmentStore implementation. Useful for testing.
  */
-class MemoryAttachmentStore(dbName: String)(implicit system: ActorSystem,
-                                            logging: Logging)
-    extends AttachmentStore {
+class MemoryAttachmentStore(dbName: String)(implicit system: ActorSystem, logging: Logging) extends AttachmentStore {
 
   override protected[core] implicit val executionContext: ExecutionContext = system.dispatcher
 

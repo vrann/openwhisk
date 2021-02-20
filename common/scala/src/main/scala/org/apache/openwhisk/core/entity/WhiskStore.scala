@@ -93,12 +93,7 @@ object WhiskEntityStore {
   def datastore()(implicit system: ActorSystem, logging: Logging) =
     SpiLoader
       .get[ArtifactStoreProvider]
-      .makeStore[WhiskEntity]()(
-        classTag[WhiskEntity],
-        WhiskEntityJsonFormat,
-        WhiskDocumentReader,
-        system,
-        logging)
+      .makeStore[WhiskEntity]()(classTag[WhiskEntity], WhiskEntityJsonFormat, WhiskDocumentReader, system, logging)
 }
 
 object WhiskActivationStore {

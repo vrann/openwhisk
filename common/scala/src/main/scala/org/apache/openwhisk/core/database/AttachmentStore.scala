@@ -29,7 +29,7 @@ import scala.reflect.ClassTag
 
 trait AttachmentStoreProvider extends Spi {
   def makeStore[D <: DocumentSerializer: ClassTag]()(implicit
-    actorSystem: ActorSystem,
+                                                     actorSystem: ActorSystem,
                                                      logging: Logging): AttachmentStore
 }
 

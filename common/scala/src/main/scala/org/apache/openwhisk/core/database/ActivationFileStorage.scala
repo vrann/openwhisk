@@ -35,13 +35,11 @@ import spray.json._
 
 import scala.concurrent.duration._
 
-class ActivationFileStorage(
-  logFilePrefix:     String,
-  logPath:           Path,
-  writeResultToFile: Boolean,
-  actorSystem:       ActorSystem,
-  logging:           Logging
-) {
+class ActivationFileStorage(logFilePrefix: String,
+                            logPath: Path,
+                            writeResultToFile: Boolean,
+                            actorSystem: ActorSystem,
+                            logging: Logging) {
   implicit val system: ActorSystem = actorSystem
 
   private var logFile = logPath
@@ -50,27 +48,28 @@ class ActivationFileStorage(
   private val writeToFile: Sink[ByteString, _] = MergeHub
     .source[ByteString]
     .batchWeighted(bufferSize.toBytes, _.length, identity)(_ ++ _)
-    .to(RestartSink.withBackoff(RestartSettings(minBackoff = 1.seconds, maxBackoff = 60.seconds, randomFactor = 0.2)) { () =>
-      LogRotatorSink(() => {
-        val maxSize = bufferSize.toBytes
-        var bytesRead = maxSize
-        element =>
-          {
-            val size = element.size
+    .to(RestartSink.withBackoff(RestartSettings(minBackoff = 1.seconds, maxBackoff = 60.seconds, randomFactor = 0.2)) {
+      () =>
+        LogRotatorSink(() => {
+          val maxSize = bufferSize.toBytes
+          var bytesRead = maxSize
+          element =>
+            {
+              val size = element.size
 
-            if (bytesRead + size > maxSize) {
-              logFile = logPath.resolve(s"$logFilePrefix-${Instant.now.toEpochMilli}.log")
+              if (bytesRead + size > maxSize) {
+                logFile = logPath.resolve(s"$logFilePrefix-${Instant.now.toEpochMilli}.log")
 
-              logging.info(this, s"Rotating log file to '$logFile'")
-              createLogFile(logFile)
-              bytesRead = size
-              Some(logFile)
-            } else {
-              bytesRead += size
-              None
+                logging.info(this, s"Rotating log file to '$logFile'")
+                createLogFile(logFile)
+                bytesRead = size
+                Some(logFile)
+              } else {
+                bytesRead += size
+                None
+              }
             }
-          }
-      })
+        })
     })
     .run()
 

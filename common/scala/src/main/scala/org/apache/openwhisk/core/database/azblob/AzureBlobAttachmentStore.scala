@@ -112,10 +112,9 @@ object AzureBlobAttachmentStoreProvider extends AttachmentStoreProvider {
 
 class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String, config: AzBlobConfig)(
   implicit
-  system:  ActorSystem,
-  logging: Logging
-)
-  extends AttachmentStore {
+  system: ActorSystem,
+  logging: Logging)
+    extends AttachmentStore {
   override protected[core] def scheme: String = "az"
 
   override protected[core] implicit val executionContext: ExecutionContext = system.dispatcher
@@ -248,10 +247,8 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
       failure => s"[ATTS_DELETE] '$prefix' internal error, doc: '$docId', failure: '${failure.getMessage}'")
   }
 
-  override protected[core] def deleteAttachment(docId: DocId, name: String)(
-    implicit
-    transid: TransactionId
-  ): Future[Boolean] = {
+  override protected[core] def deleteAttachment(docId: DocId, name: String)(implicit
+                                                                            transid: TransactionId): Future[Boolean] = {
     val start =
       transid.started(this, DATABASE_ATT_DELETE, s"[ATT_DELETE] deleting attachment '$name' of document 'id: $docId'")
 
@@ -263,8 +260,7 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
     reportFailure(
       f,
       start,
-      failure => s"[ATT_DELETE] '$prefix' internal error, doc: '$docId', failure: '${failure.getMessage}'"
-    )
+      failure => s"[ATT_DELETE] '$prefix' internal error, doc: '$docId', failure: '${failure.getMessage}'")
   }
 
   override def shutdown(): Unit = {}
@@ -279,8 +275,7 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
 
   private def getAttachmentSource(objectKey: String, config: AzBlobConfig)(
     implicit
-    tid: TransactionId
-  ): Future[Option[Source[ByteString, Any]]] = {
+    tid: TransactionId): Future[Option[Source[ByteString, Any]]] = {
     val blobClient = client.getBlobAsyncClient(objectKey).getBlockBlobAsyncClient
 
     config.azureCdnConfig match {
@@ -297,8 +292,7 @@ class AzureBlobAttachmentStore(client: BlobContainerAsyncClient, prefix: String,
         val url = parts.setHost(cdnConfig.domainName)
         logging.info(
           this,
-          s"[ATT_GET] '$prefix' downloading attachment from azure cdn '$objectKey' with url (sas params not displayed) ${url}"
-        )
+          s"[ATT_GET] '$prefix' downloading attachment from azure cdn '$objectKey' with url (sas params not displayed) ${url}")
         //append the sas params to the url before downloading
         val cdnUrlWithSas = s"${url.toUrl.toString}?$sas"
         getUrlContent(cdnUrlWithSas)

@@ -36,10 +36,10 @@ case class ArtifactWithFileStorageActivationStoreConfig(logFilePrefix: String,
 
 class ArtifactWithFileStorageActivationStore(
   actorSystem: ActorSystem,
-  logging:     Logging,
-  config:      ArtifactWithFileStorageActivationStoreConfig = loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfig](ConfigKeys.activationStoreWithFileStorage)
-)
-  extends ArtifactActivationStore(actorSystem, logging) {
+  logging: Logging,
+  config: ArtifactWithFileStorageActivationStoreConfig =
+    loadConfigOrThrow[ArtifactWithFileStorageActivationStoreConfig](ConfigKeys.activationStoreWithFileStorage))
+    extends ArtifactActivationStore(actorSystem, logging) {
 
   private val activationFileStorage =
     new ActivationFileStorage(
@@ -47,8 +47,7 @@ class ArtifactWithFileStorageActivationStore(
       Paths.get(config.logPath),
       config.writeResultToFile,
       actorSystem,
-      logging
-    )
+      logging)
 
   def getLogFile = activationFileStorage.getLogFile
 

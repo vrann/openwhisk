@@ -46,15 +46,12 @@ import akka.stream.scaladsl.{Sink, Source}
  * @param batchSize maximum size of a batch
  * @param concurrency number of batches being handled in parallel
  * @param operation operation taking the batch
- *
  * @tparam T the type to be batched
  * @tparam R return type of a single element after operation
  */
-class Batcher[T, R](batchSize: Int, concurrency: Int)(operation: Seq[T] => Future[Seq[R]])(
-  implicit
-  system: ActorSystem,
-  ec:     ExecutionContext
-) {
+class Batcher[T, R](batchSize: Int, concurrency: Int)(operation: Seq[T] => Future[Seq[R]])(implicit
+                                                                                           system: ActorSystem,
+                                                                                           ec: ExecutionContext) {
 
   val cm: PartialFunction[Any, CompletionStrategy] = {
     case Done =>
@@ -66,8 +63,7 @@ class Batcher[T, R](batchSize: Int, concurrency: Int)(operation: Seq[T] => Futur
       completionMatcher = cm,
       failureMatcher = PartialFunction.empty[Any, Throwable],
       bufferSize = Int.MaxValue,
-      overflowStrategy = OverflowStrategy.dropNew
-    )
+      overflowStrategy = OverflowStrategy.dropNew)
     .batch(batchSize, Queue(_))((queue, element) => queue :+ element)
     .mapAsyncUnordered(concurrency) { els =>
       val elements = els.map(_._1)

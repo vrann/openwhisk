@@ -48,11 +48,11 @@ case class CouchDbConfig(provider: String,
 
 object CouchDbStoreProvider extends ArtifactStoreProvider {
 
-  def makeStore[D <: DocumentSerializer: ClassTag](useBatching: Boolean)(
-    implicit jsonFormat: RootJsonFormat[D],
-    docReader: DocumentReader,
-    actorSystem: ActorSystem,
-    logging: Logging): ArtifactStore[D] = makeArtifactStore(useBatching, getAttachmentStore())
+  def makeStore[D <: DocumentSerializer: ClassTag](useBatching: Boolean)(implicit jsonFormat: RootJsonFormat[D],
+                                                                         docReader: DocumentReader,
+                                                                         actorSystem: ActorSystem,
+                                                                         logging: Logging): ArtifactStore[D] =
+    makeArtifactStore(useBatching, getAttachmentStore())
 
   def makeArtifactStore[D <: DocumentSerializer: ClassTag](useBatching: Boolean,
                                                            attachmentStore: Option[AttachmentStore])(

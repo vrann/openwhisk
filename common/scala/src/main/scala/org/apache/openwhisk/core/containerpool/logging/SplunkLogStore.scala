@@ -111,10 +111,9 @@ class SplunkLogStore(
     host = splunkConfig.host,
     port = splunkConfig.port,
     connectionContext =
-    if (splunkConfig.disableSNI)
-      ConnectionContext.httpsClient(createInsecureSslEngine _)
-    else Http().defaultClientHttpsContext
-  )
+      if (splunkConfig.disableSNI)
+        ConnectionContext.httpsClient(createInsecureSslEngine _)
+      else Http().defaultClientHttpsContext)
 
   override def fetchLogs(namespace: String,
                          activationId: ActivationId,

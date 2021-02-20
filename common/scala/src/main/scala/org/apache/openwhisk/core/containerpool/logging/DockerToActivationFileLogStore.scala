@@ -87,9 +87,8 @@ class DockerToActivationFileLogStore(system: ActorSystem, destinationDirectory: 
   protected val writeToFile: Sink[ByteString, _] = MergeHub
     .source[ByteString]
     .batchWeighted(bufferSize.toBytes, _.length, identity)(_ ++ _)
-    .to(RestartSink.withBackoff(
-      RestartSettings(minBackoff = 1.seconds, maxBackoff = 60.seconds, randomFactor = 0.2)
-    ) { () =>
+    .to(RestartSink.withBackoff(RestartSettings(minBackoff = 1.seconds, maxBackoff = 60.seconds, randomFactor = 0.2)) {
+      () =>
         LogRotatorSink(() => {
           val maxSize = bufferSize.toBytes
           var bytesRead = maxSize
@@ -115,7 +114,7 @@ class DockerToActivationFileLogStore(system: ActorSystem, destinationDirectory: 
               }
             }
         })
-      })
+    })
     .run()
 
   override def collectLogs(transid: TransactionId,
