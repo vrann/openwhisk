@@ -27,8 +27,7 @@ import org.apache.openwhisk.core.database.RemoteCacheInvalidation.cacheInvalidat
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Success
 
-class CacheInvalidator(globalConfig: Config)(implicit system: ActorSystem,
-                                             log: Logging) {
+class CacheInvalidator(globalConfig: Config)(implicit system: ActorSystem, log: Logging) {
   import CacheInvalidator._
   val instanceId = "cache-invalidator"
   val whisksCollection = "whisks"

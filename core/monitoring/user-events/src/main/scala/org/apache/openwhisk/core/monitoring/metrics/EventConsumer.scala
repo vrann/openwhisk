@@ -46,12 +46,10 @@ trait MetricRecorder {
   def processMetric(metric: Metric, initiatorNamespace: String): Unit
 }
 
-case class EventConsumer(
-  settings:     ConsumerSettings[String, String],
-  recorders:    Seq[MetricRecorder],
-  metricConfig: MetricConfig
-)(implicit system: ActorSystem)
-  extends KafkaMetricsProvider {
+case class EventConsumer(settings: ConsumerSettings[String, String],
+                         recorders: Seq[MetricRecorder],
+                         metricConfig: MetricConfig)(implicit system: ActorSystem)
+    extends KafkaMetricsProvider {
   import EventConsumer._
 
   private implicit val ec: ExecutionContext = system.dispatcher
@@ -92,11 +90,12 @@ case class EventConsumer(
   private val control = new AtomicReference[Consumer.Control](Consumer.NoopControl)
 
   private val result = RestartSource
-    .onFailuresWithBackoff(RestartSettings(
-      minBackoff = metricConfig.retry.minBackoff,
-      maxBackoff = metricConfig.retry.maxBackoff,
-      randomFactor = metricConfig.retry.randomFactor
-    ).withMaxRestarts(metricConfig.retry.maxRestarts, metricConfig.retry.minBackoff)) { () =>
+    .onFailuresWithBackoff(
+      RestartSettings(
+        minBackoff = metricConfig.retry.minBackoff,
+        maxBackoff = metricConfig.retry.maxBackoff,
+        randomFactor = metricConfig.retry.randomFactor)
+        .withMaxRestarts(metricConfig.retry.maxRestarts, metricConfig.retry.minBackoff)) { () =>
       Consumer
         .committableSource(updatedSettings, Subscriptions.topics(userEventTopic))
         // this is to access to the Consumer.Control
