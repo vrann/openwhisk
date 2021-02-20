@@ -34,15 +34,13 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.reflect.io.Directory
 import scala.util.Try
 
-class KafkaLauncher(docker: StandaloneDockerClient,
-                    kafkaPort: Int,
-                    kafkaDockerPort: Int,
-                    zkPort: Int,
-                    workDir: File,
-                    kafkaUi: Boolean)(implicit logging: Logging,
-                                      ec: ExecutionContext,
-                                      actorSystem: ActorSystem,
-                                      tid: TransactionId) {
+class KafkaLauncher(
+  docker: StandaloneDockerClient,
+  kafkaPort: Int,
+  kafkaDockerPort: Int,
+  zkPort: Int,
+  workDir: File,
+  kafkaUi: Boolean)(implicit logging: Logging, ec: ExecutionContext, actorSystem: ActorSystem, tid: TransactionId) {
 
   def run(): Future[Seq[ServiceContainer]] = {
     for {
@@ -113,9 +111,9 @@ class KafkaLauncher(docker: StandaloneDockerClient,
 object KafkaAwareLeanBalancer extends LoadBalancerProvider {
   override def requiredProperties: Map[String, String] = LeanBalancer.requiredProperties ++ kafkaHosts
 
-  override def instance(whiskConfig: WhiskConfig, instance: ControllerInstanceId)(
-    implicit actorSystem: ActorSystem,
-    logging: Logging): LoadBalancer = LeanBalancer.instance(whiskConfig, instance)
+  override def instance(whiskConfig: WhiskConfig, instance: ControllerInstanceId)(implicit actorSystem: ActorSystem,
+                                                                                  logging: Logging): LoadBalancer =
+    LeanBalancer.instance(whiskConfig, instance)
 }
 
 object KafkaLauncher {

@@ -37,16 +37,14 @@ import scala.concurrent.{Await, ExecutionContext}
 import scala.sys.process._
 import scala.util.{Failure, Success, Try}
 
-class PlaygroundLauncher(host: String,
-                         extHost: String,
-                         controllerPort: Int,
-                         pgPort: Int,
-                         authKey: String,
-                         devMode: Boolean,
-                         noBrowser: Boolean)(implicit logging: Logging,
-                                             ec: ExecutionContext,
-                                             actorSystem: ActorSystem,
-                                             tid: TransactionId) {
+class PlaygroundLauncher(
+  host: String,
+  extHost: String,
+  controllerPort: Int,
+  pgPort: Int,
+  authKey: String,
+  devMode: Boolean,
+  noBrowser: Boolean)(implicit logging: Logging, ec: ExecutionContext, actorSystem: ActorSystem, tid: TransactionId) {
   private val interface = loadConfigOrThrow[String]("whisk.controller.interface")
   private val jsFileName = "playgroundFunctions.js"
   private val jsContentType = ContentType(MediaTypes.`application/javascript`, HttpCharsets.`UTF-8`)

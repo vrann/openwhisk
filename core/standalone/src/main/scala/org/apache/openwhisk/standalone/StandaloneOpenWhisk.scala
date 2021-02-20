@@ -275,8 +275,7 @@ object StandaloneOpenWhisk extends SLF4JLogging {
     }
   }
 
-  def startServer(
-    conf: Conf)(implicit actorSystem: ActorSystem, logging: Logging): Unit = {
+  def startServer(conf: Conf)(implicit actorSystem: ActorSystem, logging: Logging): Unit = {
     if (canInstallUserAndActions(conf)) {
       bootstrapUsers()
     }
@@ -338,8 +337,7 @@ object StandaloneOpenWhisk extends SLF4JLogging {
     Controller.start(Array("standalone"))
   }
 
-  private def bootstrapUsers()(implicit actorSystem: ActorSystem,
-                               logging: Logging): Unit = {
+  private def bootstrapUsers()(implicit actorSystem: ActorSystem, logging: Logging): Unit = {
     implicit val userTid: TransactionId = TransactionId(systemPrefix + "userBootstrap")
     getUsers().foreach {
       case (subject, key) =>
@@ -531,10 +529,9 @@ object StandaloneOpenWhisk extends SLF4JLogging {
                               existingUserEventSvcPort: Option[Int],
                               workDir: File,
                               dataDir: File,
-                              dockerClient: StandaloneDockerClient)(
-    implicit logging: Logging,
-    as: ActorSystem,
-    ec: ExecutionContext): Seq[ServiceContainer] = {
+                              dockerClient: StandaloneDockerClient)(implicit logging: Logging,
+                                                                    as: ActorSystem,
+                                                                    ec: ExecutionContext): Seq[ServiceContainer] = {
     implicit val tid: TransactionId = TransactionId(systemPrefix + "userevents")
     val k = new UserEventLauncher(dockerClient, owPort, kafkaDockerPort, existingUserEventSvcPort, workDir, dataDir)
 
@@ -556,9 +553,8 @@ object StandaloneOpenWhisk extends SLF4JLogging {
     setSysProp("whisk.docker.standalone.container-factory.pull-standard-images", "false")
   }
 
-  private def createPgLauncher(
-    owPort: Int,
-    conf: Conf)(implicit logging: Logging, as: ActorSystem, ec: ExecutionContext) = {
+  private def createPgLauncher(owPort: Int,
+                               conf: Conf)(implicit logging: Logging, as: ActorSystem, ec: ExecutionContext) = {
     implicit val tid: TransactionId = TransactionId(systemPrefix + "playground")
     val pgPort = getPort(conf.uiPort.toOption, preferredPgPort)
     new PlaygroundLauncher(

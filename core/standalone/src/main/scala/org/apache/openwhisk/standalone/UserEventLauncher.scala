@@ -29,15 +29,13 @@ import pureconfig.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserEventLauncher(docker: StandaloneDockerClient,
-                        owPort: Int,
-                        kafkaDockerPort: Int,
-                        existingUserEventSvcPort: Option[Int],
-                        workDir: File,
-                        dataDir: File)(implicit logging: Logging,
-                                       ec: ExecutionContext,
-                                       actorSystem: ActorSystem,
-                                       tid: TransactionId) {
+class UserEventLauncher(
+  docker: StandaloneDockerClient,
+  owPort: Int,
+  kafkaDockerPort: Int,
+  existingUserEventSvcPort: Option[Int],
+  workDir: File,
+  dataDir: File)(implicit logging: Logging, ec: ExecutionContext, actorSystem: ActorSystem, tid: TransactionId) {
 
   //owPort+1 is used by Api Gateway
   private val userEventPort = existingUserEventSvcPort.getOrElse(checkOrAllocatePort(owPort + 2))
