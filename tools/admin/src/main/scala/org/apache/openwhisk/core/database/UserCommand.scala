@@ -318,16 +318,10 @@ class UserCommand extends Subcommand("user") with WhiskCommand {
 }
 
 object UserCommand {
-  def createDataStore()(implicit system: ActorSystem,
-                        logging: Logging): ArtifactStore[WhiskAuth] =
+  def createDataStore()(implicit system: ActorSystem, logging: Logging): ArtifactStore[WhiskAuth] =
     SpiLoader
       .get[ArtifactStoreProvider]
-      .makeStore[WhiskAuth]()(
-        classTag[WhiskAuth],
-        ExtendedAuthFormat,
-        WhiskDocumentReader,
-        system,
-        logging)
+      .makeStore[WhiskAuth]()(classTag[WhiskAuth], ExtendedAuthFormat, WhiskDocumentReader, system, logging)
 
   class ExtendedAuth(subject: Subject, namespaces: Set[WhiskNamespace], blocked: Option[Boolean])
       extends WhiskAuth(subject, namespaces) {

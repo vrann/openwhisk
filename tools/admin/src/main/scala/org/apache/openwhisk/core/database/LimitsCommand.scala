@@ -173,8 +173,7 @@ class LimitsCommand extends Subcommand("limits") with WhiskCommand {
 object LimitsCommand {
   def limitIdOf(name: EntityName) = DocId(s"${name.name}/limits")
 
-  def createDataStore()(implicit system: ActorSystem,
-                        logging: Logging): ArtifactStore[WhiskAuth] =
+  def createDataStore()(implicit system: ActorSystem, logging: Logging): ArtifactStore[WhiskAuth] =
     SpiLoader
       .get[ArtifactStoreProvider]
       .makeStore[WhiskAuth]()(classTag[WhiskAuth], LimitsFormat, WhiskDocumentReader, system, logging)
