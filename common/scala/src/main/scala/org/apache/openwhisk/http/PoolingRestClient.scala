@@ -24,7 +24,7 @@ import akka.http.scaladsl.marshalling._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.settings.ConnectionPoolSettings
 import akka.http.scaladsl.unmarshalling._
-import akka.stream.{Materializer, OverflowStrategy, QueueOfferResult}
+import akka.stream.{OverflowStrategy, QueueOfferResult}
 import akka.stream.scaladsl.{Flow, _}
 import spray.json._
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -45,7 +45,7 @@ class PoolingRestClient(
   port: Int,
   queueSize: Int,
   httpFlow: Option[Flow[(HttpRequest, Promise[HttpResponse]), (Try[HttpResponse], Promise[HttpResponse]), Any]] = None,
-  timeout: Option[FiniteDuration] = None)(implicit system: ActorSystem, materializer: Materializer) {
+  timeout: Option[FiniteDuration] = None)(implicit system: ActorSystem) {
   require(protocol == "http" || protocol == "https", "Protocol must be one of { http, https }.")
 
   protected implicit val context: ExecutionContext = system.dispatcher
@@ -127,7 +127,7 @@ class PoolingRestClient(
       }
     }
 
-  def shutdown(): Future[Unit] = Future.successful(materializer.shutdown())
+  def shutdown(): Future[Unit] = Future.unit
 }
 
 object PoolingRestClient {
