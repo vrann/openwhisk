@@ -349,7 +349,7 @@
       "exec /init.sh {{ controller_index }}
       >> /logs/{{ controller_name }}_logs.log 2>&1"
 
-- name: wait until the Controller in this host is up and running
+- name: wait until the Controller in this host is up and running {{controller.protocol}}://{{ansible_host}}:{{controller_port}}/ping
   uri:
     url:
       "{{controller.protocol}}://{{ansible_host}}:{{controller_port}}/ping"
