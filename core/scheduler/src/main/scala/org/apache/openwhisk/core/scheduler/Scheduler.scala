@@ -263,7 +263,7 @@ case class SchedulerEndpoints(host: String, rpcPort: Int, akkaPort: Int) {
   def getRemoteRef(name: String)(implicit context: ActorRefFactory): ActorSelection = {
     implicit val ec = context.dispatcher
 
-    val path = s"akka.tcp://scheduler-actor-system@${asAkkaEndpoint}/user/${name}"
+    val path = s"akka://scheduler-actor-system@${asAkkaEndpoint}/user/${name}"
     context.actorSelection(path)
   }
 
@@ -281,7 +281,7 @@ case class SchedulerStates(sid: SchedulerInstanceId, queueSize: Int, endpoints: 
   def getRemoteRef(name: String)(implicit context: ActorRefFactory): ActorSelection = {
     implicit val ec = context.dispatcher
 
-    val path = s"akka.tcp://scheduler-actor-system@${endpoints.asAkkaEndpoint}/user/${name}"
+    val path = s"akka//scheduler-actor-system@${endpoints.asAkkaEndpoint}/user/${name}"
     context.actorSelection(path)
   }
 
